@@ -37,6 +37,14 @@ export default function EyeTrackingPage() {
             </p>
           </div>
 
+          {/*       심박수 그림으로 표현하는 부분
+          <canvas 
+            id="heartbeatCanvas" 
+            width="640" 
+            height="480" 
+            className="fixed top-0 left-0 pointer-events-none z-10" 
+          /> */}
+
           <GazeDashboard x={coordinates.x} y={coordinates.y} />
           <GazeDot x={coordinates.x} y={coordinates.y} />
           
