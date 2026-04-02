@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+const nextConfig = {
+  transpilePackages: [
+    '@tensorflow-models/face-landmarks-detection',
+    '@mediapipe/face_mesh',
+    'webgazer'
+  ],
 };
 
 export default nextConfig;
