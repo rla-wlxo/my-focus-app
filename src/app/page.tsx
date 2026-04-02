@@ -25,14 +25,6 @@ export default function EyeTrackingPage() {
       <Script src="/webgazer.js" strategy="lazyOnload" onLoad={initWebGazer} />
       <Script src="/heartbeat.js" strategy="lazyOnload" />
 
-      {/* 심박수 분석 결과 출력용 캔버스 (z-index를 높여서 확인) */}
-      <canvas 
-        id="heartbeatCanvas" 
-        width="640" 
-        height="480" 
-        className="fixed top-0 left-0 pointer-events-none z-20 border border-white/10" 
-      />
-
       {!isLoaded && <LoadingView />}
       
       {isLoaded && (

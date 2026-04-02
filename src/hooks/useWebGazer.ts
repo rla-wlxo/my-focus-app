@@ -5,6 +5,7 @@ export function useWebGazer() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const initWebGazer = useCallback(() => {
+    //webgazer 초기화 해서 시선 데이터 받아오기 시작
     const wg = (window as any).webgazer;
     if (!wg) return;
 
@@ -27,6 +28,7 @@ export function useWebGazer() {
     }, 1000);
   }, []);
 
+  //컴포넌트 언마운트 시 웹게이저 정리
   useEffect(() => {
     return () => {
       const wg = (window as any).webgazer;
