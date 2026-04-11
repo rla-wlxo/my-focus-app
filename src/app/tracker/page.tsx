@@ -57,7 +57,7 @@ export default function TrackerPage() {
       <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl backdrop-blur-xl">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">FocusTracker Pairing</h1>
-          <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 연결할 6자리 코드를 생성하세요.</p>
+          <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 기본 페어링을 진행하세요. Apple Watch는 선택 사항입니다.</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
@@ -74,6 +74,7 @@ export default function TrackerPage() {
                   {code || '------'}
                 </div>
                 <p className="mt-4 text-sm text-slate-500">아이폰 앱에서 위 코드를 입력하면 페어링이 시작됩니다.</p>
+                <p className="mt-2 text-xs text-slate-500">Apple Watch는 선택 사항이며, 없어도 기본 연결은 가능합니다.</p>
               </div>
 
               <button
