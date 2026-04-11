@@ -1,66 +1,141 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PairingData } from '../../types/tracker';
+import { PairingData, PairingResponse } from '../../types/tracker';
 
 export default function TrackerPage() {
   const [code, setCode] = useState<string>('');
   const [data, setData] = useState<PairingData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('페어링 버튼을 눌러 6자리 코드를 생성하세요.');
 
-  // 1. 초기 코드 생성
-// 1. 초기 코드 생성 전용
-useEffect(() => {
-    const fetchCode = async () => {
-        try {
-            const res = await fetch('/api/pair/generate');
-            const json = await res.json();
-            if (json.pairingCode) {
-                setCode(json.pairingCode); // 여기서 code가 설정됩니다.
-            }
-        } catch (err) {
-            console.error("코드 생성 실패:", err);
-        }
-    };
-    fetchCode();
-}, []);
+  const generateCode = async () => {
+    setLoading(true);
+    setStatusMessage('코드를 생성 중입니다...');
+    setData(null);
 
-// 2. 실시간 상태 폴링 (code가 변할 때만 작동)
-useEffect(() => {
-    // 🚀 중요: code가 빈 문자열('')이면 서버에 요청하지 않도록 방어막을 칩니다.
+    try {
+      const res = await fetch('/api/pair/generate');
+      const json: PairingResponse = await res.json();
+      if (json?.pairingCode) {
+        setCode(json.pairingCode);
+        setStatusMessage('아이폰 앱에서 아래 6자리 코드를 입력하세요.');
+      } else {
+        setStatusMessage('코드 생성에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (err) {
+      console.error('코드 생성 실패:', err);
+      setStatusMessage('코드 생성에 실패했습니다. 인터넷 연결을 확인하세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (!code) return;
 
     const interval = setInterval(async () => {
-        try {
-            const res = await fetch(`/api/pair/status?code=${code}`);
-            if (res.ok) {
-                const json = await res.json();
-                setData(json);
-            }
-        } catch (err) {
-            console.error("데이터 가져오기 실패:", err);
-        }
+      try {
+        const res = await fetch(`/api/pair/status?code=${code}`);
+        if (!res.ok) return;
+
+        const json = await res.json();
+        setData(json);
+      } catch (err) {
+        console.error('상태 확인 실패:', err);
+      }
     }, 2000);
 
     return () => clearInterval(interval);
-}, [code]); // code가 생성되는 순간 이 useEffect가 감지해서 돌아갑니다.
+  }, [code]);
+
+  const isWaiting = !!code && (!data || data.status === 'waiting');
+  const isPaired = !!data && data.status === 'active';
+
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      <h1 className="text-3xl font-bold mb-8">FocusTracker Dashboard</h1>
-      
-      {(!data || data.heartRate === 0) ? (
-        <div className="text-center">
-          <p className="text-gray-400 mb-4">아이폰 앱에 아래 코드를 입력하세요</p>
-          <span className="text-6xl font-black tracking-widest text-blue-500">{code}</span>
+    <main className="flex min-h-screen bg-gray-950 text-white px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl backdrop-blur-xl">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">FocusTracker Pairing</h1>
+          <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 연결할 6자리 코드를 생성하세요.</p>
         </div>
-      ) : (
-        <div className="text-center">
-          <p className="text-green-400 mb-2">● 실시간 연결 중</p>
-          <div className="flex items-baseline gap-2">
-            <span className="text-9xl font-black">{data.heartRate}</span>
-            <span className="text-3xl text-gray-500">BPM</span>
-          </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
+          <section className="rounded-3xl border border-slate-800 bg-slate-950/80 p-6">
+            <div className="flex flex-col gap-4">
+              <div className="rounded-2xl bg-slate-900/90 p-5 shadow-inner shadow-slate-950/40">
+                <p className="text-sm text-slate-400">현재 상태</p>
+                <p className="mt-3 text-lg font-semibold text-white">{statusMessage}</p>
+              </div>
+
+              <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-6 text-center">
+                <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Pairing Code</p>
+                <div className="mt-6 flex items-center justify-center gap-3 rounded-3xl border border-slate-700 bg-slate-900 px-5 py-6 text-5xl font-black text-blue-400 shadow-lg shadow-blue-500/10">
+                  {code || '------'}
+                </div>
+                <p className="mt-4 text-sm text-slate-500">아이폰 앱에서 위 코드를 입력하면 페어링이 시작됩니다.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={generateCode}
+                disabled={loading}
+                className="mt-5 w-full rounded-2xl bg-blue-500 px-5 py-4 text-base font-semibold text-white transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:bg-slate-700"
+              >
+                {loading ? '생성 중...' : code ? '다시 코드 생성' : '페어링 코드 생성'}
+              </button>
+            </div>
+          </section>
+
+          <aside className="rounded-3xl border border-slate-800 bg-slate-950/90 p-6">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-xl font-semibold text-white">연동 방법</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-400">아래 단계를 따라 아이폰 앱에 코드를 입력하세요.</p>
+              </div>
+
+              <div className="space-y-4 rounded-3xl bg-slate-900/90 p-5 text-sm text-slate-300">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 rounded-2xl bg-blue-500/20 text-center text-sm font-bold text-blue-300">1</div>
+                  <div>
+                    <p className="font-semibold text-white">페어링 코드 생성</p>
+                    <p className="mt-1 text-slate-400">위 버튼으로 6자리 코드를 생성합니다.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 rounded-2xl bg-blue-500/20 text-center text-sm font-bold text-blue-300">2</div>
+                  <div>
+                    <p className="font-semibold text-white">아이폰 앱에 입력</p>
+                    <p className="mt-1 text-slate-400">생성된 6자리 코드를 아이폰 앱에 입력하세요.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 h-9 w-9 rounded-2xl bg-blue-500/20 text-center text-sm font-bold text-blue-300">3</div>
+                  <div>
+                    <p className="font-semibold text-white">연결 확인</p>
+                    <p className="mt-1 text-slate-400">입력 후 상태가 active로 바뀌면 연동이 완료됩니다.</p>
+                  </div>
+                </div>
+              </div>
+
+              {isWaiting && (
+                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-200">
+                  <p className="font-semibold text-emerald-100">대기 중...</p>
+                  <p className="mt-1 text-slate-400">아이폰 앱에서 코드를 입력하면 자동으로 연결됩니다.</p>
+                </div>
+              )}
+
+              {isPaired && data && (
+                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+                  <p className="font-semibold text-emerald-200">연결 완료!</p>
+                  <p className="mt-2 text-3xl font-black text-white">{data.heartRate}</p>
+                  <p className="text-slate-400">현재 심박수</p>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
-      )}
+      </div>
     </main>
   );
 }
