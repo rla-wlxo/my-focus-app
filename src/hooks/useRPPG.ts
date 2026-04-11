@@ -29,7 +29,7 @@ export function useRPPG(videoElementId: string, isLoaded: boolean) {
           videoElementId,
           'heartbeatCanvas',
           '/haarcascade_frontalface_alt.xml',
-          30, 6, 1000
+          30, 6, 1000 
         );
 
         // 2. BPM 업데이트 가로채기
