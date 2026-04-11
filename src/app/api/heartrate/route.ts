@@ -23,3 +23,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+// 데이터를 보내주는 GET 함수가 반드시 있어야 합니다!
+export async function GET() {
+  return NextResponse.json({ bpm: latestHeartRate });
+}
