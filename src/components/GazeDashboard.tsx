@@ -9,16 +9,16 @@ interface GazeDashboardProps {
 
 const GazeDashboard: React.FC<GazeDashboardProps> = ({ x, y }) => {
   return (
-    <div className="fixed bottom-10 left-10 bg-gradient-to-br from-slate-900/95 to-slate-800/95 p-6 rounded-2xl shadow-2xl border border-slate-600/50 backdrop-blur-md z-20">
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-2">
+    <div className="fixed sm:bottom-4 sm:left-4 md:bottom-6 md:left-6 lg:bottom-10 lg:left-10 top-4 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:top-auto sm:left-4 bg-gradient-to-br from-slate-900/95 to-slate-800/95 p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-600/50 backdrop-blur-md z-20">
+      <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-300 mb-2 sm:mb-3 flex items-center gap-2">
         <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
         Real-time Gaze
       </h2>
       
-      <div className="flex gap-8">
+      <div className="flex gap-4 sm:gap-8">
         {/* X 좌표 */}
         <div className="text-center">
-          <p className="text-3xl font-mono font-bold text-green-400 mb-1 drop-shadow-lg">
+          <p className="text-2xl sm:text-3xl font-mono font-bold text-green-400 mb-1 drop-shadow-lg">
             {x}
           </p>
           <span className="text-xs text-slate-400 uppercase tracking-wide">X Axis</span>
@@ -26,7 +26,7 @@ const GazeDashboard: React.FC<GazeDashboardProps> = ({ x, y }) => {
         
         {/* Y 좌표 */}
         <div className="text-center">
-          <p className="text-3xl font-mono font-bold text-blue-400 mb-1 drop-shadow-lg">
+          <p className="text-2xl sm:text-3xl font-mono font-bold text-blue-400 mb-1 drop-shadow-lg">
             {y}
           </p>
           <span className="text-xs text-slate-400 uppercase tracking-wide">Y Axis</span>
