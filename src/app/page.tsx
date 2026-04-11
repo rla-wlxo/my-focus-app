@@ -14,7 +14,11 @@ export default function HomePage() {
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
 
   useEffect(() => {
-    // webgazer.js와 heartbeat.js 로드
+    // OpenCV.js → webgazer.js → heartbeat.js 순서로 로드
+    const script0 = document.createElement('script');
+    script0.src = 'https://docs.opencv.org/4.5.0/opencv.js';
+    script0.async = true;
+
     const script1 = document.createElement('script');
     script1.src = '/webgazer.js';
     script1.async = true;
@@ -23,16 +27,20 @@ export default function HomePage() {
     script2.src = '/heartbeat.js';
     script2.async = true;
 
-    script1.onload = () => {
-      document.body.appendChild(script2);
-      script2.onload = () => {
-        setScriptsLoaded(true);
+    script0.onload = () => {
+      document.body.appendChild(script1);
+      script1.onload = () => {
+        document.body.appendChild(script2);
+        script2.onload = () => {
+          setScriptsLoaded(true);
+        };
       };
     };
 
-    document.body.appendChild(script1);
+    document.body.appendChild(script0);
 
     return () => {
+      if (script0.parentNode) script0.parentNode.removeChild(script0);
       if (script1.parentNode) script1.parentNode.removeChild(script1);
       if (script2.parentNode) script2.parentNode.removeChild(script2);
     };

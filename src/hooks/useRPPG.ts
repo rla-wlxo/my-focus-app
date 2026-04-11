@@ -5,49 +5,85 @@ export function useRPPG(videoElementId: string, isLoaded: boolean) {
 
   useEffect(() => {
     const win = window as any;
-    if (!isLoaded || !win.cv || !win.Heartbeat) return;
+    
+    // OpenCV와 Heartbeat이 로드될 때까지 대기
+    if (!isLoaded) return;
+
+    // OpenCV 로드 확인
+    if (!win.cv) {
+      console.warn("OpenCV(cv)가 아직 로드되지 않았습니다. 대기 중...");
+      const checkInterval = setInterval(() => {
+        if (win.cv && win.Heartbeat) {
+          clearInterval(checkInterval);
+          initHeartbeat();
+        }
+      }, 500);
+      return () => clearInterval(checkInterval);
+    }
+
+    // Heartbeat 클래스 확인
+    if (!win.Heartbeat) {
+      console.error("Heartbeat 클래스를 찾을 수 없습니다.");
+      return;
+    }
 
     let hb: any = null;
 
-    const startEngine = async () => {
-      // 1. WebGazer가 비디오 태그를 생성할 때까지 최대 3초간 대기
-      let video = document.getElementById(videoElementId);
-      let attempts = 0;
-      while (!video && attempts < 30) {
-        await new Promise(r => setTimeout(r, 100));
-        video = document.getElementById(videoElementId);
-        attempts++;
-      }
-
-      if (!video) {
-        console.error("비디오 태그를 찾을 수 없습니다.");
-        return;
-      }
-
+    const initHeartbeat = async () => {
       try {
+        // 1. WebGazer가 비디오 태그를 생성할 때까지 대기
+        let video = document.getElementById(videoElementId);
+        let attempts = 0;
+        while (!video && attempts < 50) {
+          await new Promise(r => setTimeout(r, 100));
+          video = document.getElementById(videoElementId);
+          attempts++;
+        }
+
+        if (!video) {
+          console.error(`비디오 태그 '${videoElementId}'를 찾을 수 없습니다.`);
+          return;
+        }
+
+        console.log("Heartbeat 초기화 중...");
+
         hb = new win.Heartbeat(
           videoElementId,
           'heartbeatCanvas',
           '/haarcascade_frontalface_alt.xml',
-          30, 6, 1000 
+          30, // targetFps
+          6,  // windowSize
+          1000 // rppgInterval
         );
 
-        // 2. BPM 업데이트 가로채기
+        // 2. BPM 업데이트 처리
         hb.drawBPM = (calculatedBpm: number) => {
+          console.log("계산된 BPM:", calculatedBpm);
           if (calculatedBpm > 40 && calculatedBpm < 180) {
             setBpm(Math.round(calculatedBpm));
           }
         };
 
+        // 3. Heartbeat 엔진 시작
         await hb.init();
+        console.log("Heartbeat 엔진이 성공적으로 시작되었습니다.");
       } catch (error) {
         console.error("rPPG 실행 실패:", error);
       }
     };
 
-    startEngine();
+    initHeartbeat();
 
-    return () => { if (hb) hb.stop(); };
+    return () => {
+      if (hb && hb.stop) {
+        try {
+          hb.stop();
+          console.log("Heartbeat 엔진이 종료되었습니다.");
+        } catch (e) {
+          console.log("Heartbeat 정리 중 에러:", e);
+        }
+      }
+    };
   }, [videoElementId, isLoaded]);
 
   return { bpm };
