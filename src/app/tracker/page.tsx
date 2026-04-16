@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { PairingData, PairingResponse } from '../../types/tracker';
 import WebcamView from '../../components/WebcamView';
 import { useRPPG } from '../../hooks/useRPPG';
 
 export default function TrackerPage() {
+  const router = useRouter();
   const [code, setCode] = useState<string>('');
   const [data, setData] = useState<PairingData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -82,6 +84,14 @@ export default function TrackerPage() {
   return (
     <main className="flex min-h-screen bg-gray-950 text-white px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl backdrop-blur-xl">
+        <button
+          onClick={() => router.back()}
+          className="mb-8 inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+        >
+          <span>←</span>
+          <span>뒤로가기</span>
+        </button>
+
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">FocusTracker Pairing</h1>
           <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 기본 페어링을 진행하세요. Apple Watch가 페어링되지 않은 경우 웹캠을 통한 rPPG 측정이 자동으로 시작됩니다.</p>

@@ -19,7 +19,7 @@ export default function HomePage() {
             <h1 className="text-3xl font-bold">집중도 모니터링</h1>
             <p className="text-slate-400">실시간 데이터 트래킹</p>
           </div>
-          <button onClick={() => router.push('/tracker')} className="...">⌚ 애플워치 연동</button>
+          <button onClick={() => router.push('/tracker')} className="rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold shadow-lg shadow-blue-500/20 transition hover:shadow-lg hover:shadow-blue-400/40">⌚ Apple Watch 연동</button>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -44,7 +44,7 @@ export default function HomePage() {
             <StatusCard label={`심박수 (${heartRateSource})`} status={heartRate > 0 ? "감지됨" : "대기 중"} isActive={heartRate > 0} colorClass="red" />
             <StatusCard label="시선 추적" status={isLoaded ? "로드됨" : "로드 중"} isActive={isLoaded} colorClass="blue" />
             
-            <button onClick={() => router.push('/result')} className="w-full ...">
+            <button onClick={() => router.push('/result')} className="w-full rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 px-6 py-3 font-semibold shadow-lg shadow-cyan-500/20 transition hover:shadow-lg hover:shadow-cyan-400/40">
               결과 보기
             </button>
           </aside>
