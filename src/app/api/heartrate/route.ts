@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { pairingCodes, setCurrentPairing } from '@/lib/db';
 export async function POST(request: Request) {
   try {
-    const body: { pairingCode: string; heartRate: number } = await request.json();
-    const { pairingCode, heartRate } = body;
+    const body: { pairingCode: string; heartRate: number; appleWatchPaired?: boolean } = await request.json();
+    const { pairingCode, heartRate, appleWatchPaired } = body;
 
     const session = pairingCodes.get(pairingCode);
 
@@ -12,7 +12,8 @@ export async function POST(request: Request) {
         ...session,
         heartRate,
         status: 'active',
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        appleWatchPaired
       });
       setCurrentPairing(pairingCodes.get(pairingCode)!);
       console.log(`[TS-Backend] Code: ${pairingCode}, BPM: ${heartRate}`);

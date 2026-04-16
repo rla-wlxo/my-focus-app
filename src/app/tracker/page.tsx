@@ -2,12 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { PairingData, PairingResponse } from '../../types/tracker';
+import WebcamView from '../../components/WebcamView';
+import { useRPPG } from '../../hooks/useRPPG';
 
 export default function TrackerPage() {
   const [code, setCode] = useState<string>('');
   const [data, setData] = useState<PairingData | null>(null);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('페어링 버튼을 눌러 6자리 코드를 생성하세요.');
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // rPPG 훅 사용
+  const { bpm } = useRPPG('webgazerVideoFeed', isLoaded);
 
   const generateCode = async () => {
     setLoading(true);
@@ -49,15 +55,29 @@ export default function TrackerPage() {
     return () => clearInterval(interval);
   }, [code]);
 
+  // 라이브러리 로드 확인
+  useEffect(() => {
+    const checkLibraries = () => {
+      const win = window as any;
+      if (win.cv && win.Heartbeat) {
+        setIsLoaded(true);
+      } else {
+        setTimeout(checkLibraries, 500);
+      }
+    };
+    checkLibraries();
+  }, []);
+
   const isWaiting = !!code && (!data || data.status === 'waiting');
   const isPaired = !!data && data.status === 'active';
+  const useRPPGMode = !isPaired || (isPaired && !data.appleWatchPaired);
 
   return (
     <main className="flex min-h-screen bg-gray-950 text-white px-4 py-10 sm:px-6">
       <div className="mx-auto w-full max-w-3xl rounded-3xl border border-slate-800 bg-slate-900/95 p-8 shadow-2xl backdrop-blur-xl">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">FocusTracker Pairing</h1>
-          <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 기본 페어링을 진행하세요. Apple Watch는 선택 사항입니다.</p>
+          <p className="mt-3 text-sm text-slate-400 sm:text-base">버튼을 눌러 iPhone 앱과 기본 페어링을 진행하세요. Apple Watch가 페어링되지 않은 경우 웹캠을 통한 rPPG 측정이 자동으로 시작됩니다.</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_0.9fr]">
@@ -85,6 +105,12 @@ export default function TrackerPage() {
               >
                 {loading ? '생성 중...' : code ? '다시 코드 생성' : '페어링 코드 생성'}
               </button>
+
+              {useRPPGMode && (
+                <div className="mt-6">
+                  <WebcamView />
+                </div>
+              )}
             </div>
           </section>
 
@@ -126,11 +152,19 @@ export default function TrackerPage() {
                 </div>
               )}
 
-              {isPaired && data && (
+              {isPaired && data.appleWatchPaired && (
                 <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
-                  <p className="font-semibold text-emerald-200">연결 완료!</p>
+                  <p className="font-semibold text-emerald-200">Apple Watch 연결 완료!</p>
                   <p className="mt-2 text-3xl font-black text-white">{data.heartRate}</p>
-                  <p className="text-slate-400">현재 심박수</p>
+                  <p className="text-slate-400">현재 심박수 (Apple Watch)</p>
+                </div>
+              )}
+
+              {useRPPGMode && (
+                <div className="rounded-3xl border border-blue-500/20 bg-blue-500/10 p-4 text-sm text-blue-100">
+                  <p className="font-semibold text-blue-200">rPPG 모드</p>
+                  <p className="mt-2 text-3xl font-black text-white">{bpm || '--'}</p>
+                  <p className="text-slate-400">현재 심박수 (웹캠)</p>
                 </div>
               )}
             </div>
