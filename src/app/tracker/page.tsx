@@ -59,13 +59,20 @@ export default function TrackerPage() {
   useEffect(() => {
     const checkLibraries = () => {
       const win = window as any;
-      if (win.cv && win.Heartbeat) {
+      if (win.cv && win.Heartbeat && win.webgazer) {
+        console.log("Tracker: 모든 라이브러리 로드됨");
         setIsLoaded(true);
       } else {
+        console.log("Tracker: 라이브러리 로드 대기 중...", { cv: !!win.cv, Heartbeat: !!win.Heartbeat, webgazer: !!win.webgazer });
         setTimeout(checkLibraries, 500);
       }
     };
-    checkLibraries();
+    // DOM이 로드된 후 체크 시작
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkLibraries);
+    } else {
+      checkLibraries();
+    }
   }, []);
 
   const isWaiting = !!code && (!data || data.status === 'waiting');

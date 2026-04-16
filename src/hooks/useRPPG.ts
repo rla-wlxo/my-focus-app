@@ -7,7 +7,12 @@ export function useRPPG(videoElementId: string, isLoaded: boolean) {
     const win = window as any;
     
     // OpenCV와 Heartbeat이 로드될 때까지 대기
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      console.log("rPPG: 라이브러리 로드 대기 중...");
+      return;
+    }
+
+    console.log("rPPG: 라이브러리 로드됨, 초기화 시작");
 
     // OpenCV 로드 확인
     if (!win.cv) {
@@ -26,6 +31,8 @@ export function useRPPG(videoElementId: string, isLoaded: boolean) {
       console.error("Heartbeat 클래스를 찾을 수 없습니다.");
       return;
     }
+
+    console.log("rPPG: Heartbeat 클래스 발견, 초기화 진행");
 
     let hb: any = null;
 

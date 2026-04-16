@@ -27,6 +27,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script src="/opencv.js" defer></script>
+        <script src="/heartbeat.js" defer></script>
+        <script src="/webgazer.js" defer></script>
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
