@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pairingCodes } from '@/lib/db';
+import { pairingCodes, setCurrentPairing } from '@/lib/db';
 export async function POST(request: Request) {
   try {
     const body: { pairingCode: string; heartRate: number } = await request.json();
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
         status: 'active',
         updatedAt: Date.now()
       });
+      setCurrentPairing(pairingCodes.get(pairingCode)!);
       console.log(`[TS-Backend] Code: ${pairingCode}, BPM: ${heartRate}`);
       return NextResponse.json({ success: true });
     }

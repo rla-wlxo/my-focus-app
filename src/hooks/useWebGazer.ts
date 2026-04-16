@@ -13,19 +13,9 @@ export function useWebGazer() {
       if (data) setCoordinates({ x: Math.floor(data.x), y: Math.floor(data.y) });
     }).begin();
 
-    wg.showVideoPreview(true).showPredictionPoints(false);
+    wg.showVideoPreview(false).showPredictionPoints(false);
 
-    setTimeout(() => {
-      const video = document.getElementById('webgazerVideoFeed');
-      if (video) {
-        Object.assign(video.style, {
-          position: 'fixed', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)', width: '640px',
-          borderRadius: '20px', zIndex: '5',
-        });
-      }
-      setIsLoaded(true);
-    }, 1000);
+    setIsLoaded(true);
   }, []);
 
   //컴포넌트 언마운트 시 웹게이저 정리
@@ -38,13 +28,11 @@ export function useWebGazer() {
           wg.pause();
           wg.stopVideo(); // 비디오 스트림을 먼저 명확히 끕니다.
           
-          // 2. WebGazer가 만든 UI 엘리먼트들이 남아있다면 강제로 제거
-          const videoElement = document.getElementById('webgazerVideoFeed');
+          // 2. WebGazer가 만든 UI 엘리먼트들이 남아있다면 강제로 제거 (but keep our video element)
           const canvasElement = document.getElementById('webgazerVideoCanvas');
           const faceDot = document.getElementById('webgazerFaceDot');
           const faceFeedback = document.getElementById('webgazerFaceFeedbackBox');
 
-          if (videoElement) videoElement.remove();
           if (canvasElement) canvasElement.remove();
           if (faceDot) faceDot.remove();
           if (faceFeedback) faceFeedback.remove();

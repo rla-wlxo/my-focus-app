@@ -12,6 +12,11 @@ export default function HomePage() {
   const { coordinates, isLoaded, initWebGazer } = useWebGazer();
   const { bpm } = useRPPG('webgazerVideoFeed', isLoaded);
   const [scriptsLoaded, setScriptsLoaded] = useState(false);
+  const [phoneBpm, setPhoneBpm] = useState<number>(0);
+
+  // Combined heart rate: prioritize Apple Watch, fallback to webcam
+  const heartRate = phoneBpm > 0 ? phoneBpm : bpm;
+  const heartRateSource = phoneBpm > 0 ? 'Apple Watch' : 'Camera';
 
   useEffect(() => {
     // OpenCV.js → webgazer.js → heartbeat.js 순서로 로드
@@ -52,6 +57,23 @@ export default function HomePage() {
     }
   }, [scriptsLoaded, initWebGazer]);
 
+  // Poll for phone heart rate
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/pair/current');
+        if (res.ok) {
+          const data = await res.json();
+          setPhoneBpm(data.heartRate);
+        }
+      } catch (err) {
+        // Ignore errors
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white p-6">
       <div className="mx-auto max-w-7xl">
@@ -80,8 +102,8 @@ export default function HomePage() {
               
               {/* 심박수 표시 */}
               <div className="absolute top-6 right-6 rounded-xl bg-slate-950/90 px-4 py-3 ring-1 ring-slate-600/50">
-                <p className="text-xs uppercase tracking-wider text-slate-400">심박수</p>
-                <p className="mt-1 text-3xl font-bold text-red-400">{bpm}</p>
+                <p className="text-xs uppercase tracking-wider text-slate-400">{heartRateSource}</p>
+                <p className="mt-1 text-3xl font-bold text-red-400">{heartRate}</p>
                 <p className="text-xs text-slate-500">BPM</p>
               </div>
 
@@ -119,11 +141,11 @@ export default function HomePage() {
             {/* 심박수 상태 */}
             <div className="rounded-2xl bg-gradient-to-br from-red-900/30 to-slate-900/70 p-4 ring-1 ring-red-500/20">
               <div className="flex items-center gap-3">
-                <div className={`h-3 w-3 rounded-full ${bpm > 0 ? 'bg-red-400 animate-pulse' : 'bg-slate-600'}`}></div>
+                <div className={`h-3 w-3 rounded-full ${heartRate > 0 ? 'bg-red-400 animate-pulse' : 'bg-slate-600'}`}></div>
                 <div>
-                  <p className="text-sm text-slate-400">심박 분석</p>
-                  <p className={`font-semibold ${bpm > 0 ? 'text-red-400' : 'text-slate-500'}`}>
-                    {bpm > 0 ? '감지됨' : '감지 대기 중'}
+                  <p className="text-sm text-slate-400">심박수 ({heartRateSource})</p>
+                  <p className={`font-semibold ${heartRate > 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                    {heartRate > 0 ? '감지됨' : '감지 대기 중'}
                   </p>
                 </div>
               </div>

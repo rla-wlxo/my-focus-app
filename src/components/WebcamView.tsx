@@ -24,10 +24,11 @@ export default function WebcamView() {
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-xl font-bold mb-4">실시간 집중도 모니터링</h2>
-      <video 
-        ref={videoRef} 
-        autoPlay 
-        playsInline 
+      <video
+        id="webgazerVideoFeed"
+        ref={videoRef}
+        autoPlay
+        playsInline
         className="rounded-lg shadow-lg w-full max-w-2xl border-4 border-blue-500"
       />
     </div>
